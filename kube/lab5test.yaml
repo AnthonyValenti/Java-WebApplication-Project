@@ -1,0 +1,217 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: addmoviedb-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: addmoviedb
+spec:
+  selector:
+    app: addmoviedb
+  ports:
+    - port: 3306
+      targetPort: 3306
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: addmoviedb
+spec:
+  selector:
+    matchLabels:
+      app: addmoviedb
+  template:
+    metadata:
+      labels:
+        app: addmoviedb
+    spec:
+      containers:
+        - name: addmoviedb
+          image: alvalent/coe692:addmoviedb
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: storage
+              mountPath: /data/addmoviedb
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: addmoviedb-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: deletemoviedb-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: deletemoviedb
+spec:
+  selector:
+    app: deletemoviedb
+  ports:
+    - port: 3306
+      targetPort: 3306
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deletemoviedb
+spec:
+  selector:
+    matchLabels:
+      app: deletemoviedb
+  template:
+    metadata:
+      labels:
+        app: deletemoviedb
+    spec:
+      containers:
+        - name: deletemoviedb
+          image: alvalent/coe692:deletemoviedb
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: storage
+              mountPath: /data/deletemoviedb
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: deletemoviedb-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: accountsdb-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: accountsdb
+spec:
+  selector:
+    app: accountsdb
+  ports:
+    - port: 3306
+      targetPort: 3306
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: accountsdb
+spec:
+  selector:
+    matchLabels:
+      app: accountsdb
+  template:
+    metadata:
+      labels:
+        app: accountsdb
+    spec:
+      containers:
+        - name: accountsdb
+          image: alvalent/coe692:accountsdb
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: storage
+              mountPath: /data/accountsdb
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: accountsdb-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: addmovie
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: addmovie
+  template:
+    metadata:
+      labels:
+        app: addmovie
+    spec:
+      containers:
+        - name: addmovie
+          image: alvalent/coe692:addmovieWebApp
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_URL
+              value: 34.95.14.175:3306
+            - name: kubeMQAddress
+              value: 10.24.14.133:50000
+          imagePullPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: addmovie
+spec:
+  selector:
+    app: addmovie
+  ports:
+    - port: 80
+      targetPort: 8080
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: addmoviedb
+spec:
+  selector:
+    app: addmoviedb
+  ports:
+    - port: 3306
+      targetPort: 3306
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: deletemoviedb
+spec:
+  selector:
+    app: deletemoviedb
+  ports:
+    - port: 3306
+      targetPort: 3306
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: accountsdb
+spec:
+  selector:
+    app: accountsdb
+  ports:
+    - port: 3306
+      targetPort: 3306
+  type: LoadBalancer
