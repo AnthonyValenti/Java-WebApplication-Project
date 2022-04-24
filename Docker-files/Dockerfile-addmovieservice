@@ -1,0 +1,5 @@
+FROM tomcat:8.5-jdk11-openjdk
+
+COPY ./AddMovie-1.0-SNAPSHOT.war /usr/local/tomcat/webapps/AddMovie.war
+
+EXPOSE 8080
